@@ -177,7 +177,10 @@ final class EventDecodingTests: XCTestCase, FixtureLoading {
         ]
         XCTAssertEqual(expectedTags, event.tags)
 
-        XCTAssertEqual(try event.decryptedContent(using: Keypair.test.privateKey), "Secret message.")
+        let recipientPublicKeyHex = event.tags.first!.value
+        let recipientPublicKey = PublicKey(hex: recipientPublicKeyHex)!
+        
+        XCTAssertEqual(try event.decryptedContent(using: Keypair.test.privateKey, publicKey: recipientPublicKey), "Secret message.")
     }
     
     func testDecodeRecommendServer() throws {
