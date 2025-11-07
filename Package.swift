@@ -16,7 +16,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-docc-plugin.git", .upToNextMajor(from: "1.4.3")),
-        .package(url: "https://github.com/GigaBitcoin/secp256k1.swift", exact: "0.12.2"),
+        .package(url: "https://github.com/21-DOT-DEV/swift-secp256k1.git", exact: "0.19.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMajor(from: "1.8.4")),
         .package(url: "https://github.com/apple/swift-collections.git", .upToNextMajor(from: "1.1.4"))
     ],
@@ -26,7 +26,7 @@ let package = Package(
         .target(
             name: "NostrSDK",
             dependencies: [
-                .product(name: "secp256k1", package: "secp256k1.swift"),
+                .product(name: "secp256k1", package: "swift-secp256k1"),
                 "CryptoSwift",
                 .product(name: "OrderedCollections", package: "swift-collections")
             ]
