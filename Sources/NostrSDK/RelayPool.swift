@@ -63,14 +63,20 @@ public final class RelayPool: ObservableObject, RelayOperating {
     ///
     /// > Note: The relay will be automatically connected.
     public func add(relay: Relay) {
-        guard !relays.contains(relay) else {
-            logger.warning("Could not add relay because it was already in the pool: \(relay.url)")
-            return
+        if Thread.isMainThread {
+            guard !relays.contains(relay) else {
+                logger.warning("Could not add relay because it was already in the pool: \(relay.url)")
+                return
+            }
+            
+            relays.insert(relay)
+            setUpRelay(relay)
+            updateEventsPublisher()
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.add(relay: relay)
+            }
         }
-        
-        relays.insert(relay)
-        setUpRelay(relay)
-        updateEventsPublisher()
     }
     
     /// Removes a relay from the pool, if a matching one is found (based on relay URL).
@@ -78,8 +84,14 @@ public final class RelayPool: ObservableObject, RelayOperating {
     ///
     /// > Note: The relay connection will be automatically closed.
     public func remove(relay: Relay) {
-        removeRelay(withURL: relay.url)
-        updateEventsPublisher()
+        if Thread.isMainThread {
+            removeRelay(withURL: relay.url)
+            updateEventsPublisher()
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.remove(relay: relay)
+            }
+        }
     }
     
     /// Removes a relay from the pool, if one with a matching URL is found.
@@ -87,10 +99,16 @@ public final class RelayPool: ObservableObject, RelayOperating {
     ///
     /// > Note: The relay connection will be automatically closed.
     public func removeRelay(withURL relayURL: URL) {
-        let matches = relays.filter { $0.url == relayURL }
-        matches.forEach {
-            $0.disconnect()
-            relays.remove($0)
+        if Thread.isMainThread {
+            let matches = relays.filter { $0.url == relayURL }
+            matches.forEach {
+                $0.disconnect()
+                relays.remove($0)
+            }
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.removeRelay(withURL: relayURL)
+            }
         }
     }
     

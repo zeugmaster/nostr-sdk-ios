@@ -124,6 +124,7 @@ public final class Relay: ObservableObject, EventVerifying, RelayOperating, Hash
 
         socket = WebSocket(url)
         socketSubscription = socket.subject
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
                 switch event {
                 case .connected:
@@ -180,12 +181,17 @@ public final class Relay: ObservableObject, EventVerifying, RelayOperating, Hash
     
     /// Connects to the relay if it is not already in a connected or connecting state.
     public func connect() {
-        guard state != .connected && state != .connecting else {
-            return
+        if Thread.isMainThread {
+            guard state != .connected && state != .connecting else {
+                return
+            }
+            state = .connecting
+            socket.connect()
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.connect()
+            }
         }
-
-        state = .connecting
-        socket.connect()
     }
 
     /// Disconnects from the relay if it is in a connected or connecting state.
