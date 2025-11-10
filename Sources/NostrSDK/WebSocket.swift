@@ -99,12 +99,20 @@ final class WebSocket: NSObject, URLSessionWebSocketDelegate {
 
     private func resume() {
         webSocketTask.receive { [weak self] result in
+            guard let self else { return }
             switch result {
             case .success(let message):
-                self?.subject.send(.message(message))
-                self?.resume()
+                self.subject.send(.message(message))
+                self.resume()
             case .failure(let error):
-                self?.subject.send(.error(error))
+                // Filter out "Socket is not connected" errors (POSIX error 57)
+                // These are expected after disconnect() and shouldn't be treated as errors
+                let nsError = error as NSError
+                if nsError.domain == NSPOSIXErrorDomain && nsError.code == 57 {
+                    // Socket not connected - this is expected after disconnect, ignore it
+                    return
+                }
+                self.subject.send(.error(error))
             }
         }
 
