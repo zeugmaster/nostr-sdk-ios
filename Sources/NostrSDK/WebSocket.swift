@@ -27,7 +27,16 @@ enum WebSocketEvent: CustomStringConvertible {
         case .connected:
             return "Connected."
         case .message(let message):
-            return "Received message: \(message)"
+            // Never include the message content: nostr events can carry multi-kilobyte
+            // payloads (e.g. encrypted gift wraps), which would flood the logs.
+            switch message {
+            case .string(let string):
+                return "Received string message (\(string.utf8.count) bytes)."
+            case .data(let data):
+                return "Received data message (\(data.count) bytes)."
+            @unknown default:
+                return "Received message."
+            }
         case .disconnected(let closeCode, let reason):
             return "Disconnected. close code: \(closeCode), reason: \(String(describing: reason))"
         case .error(let error):

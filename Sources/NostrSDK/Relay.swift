@@ -132,7 +132,7 @@ public final class Relay: ObservableObject, EventVerifying, RelayOperating, Hash
                     self?.logger.info("\(event.description)")
                 case .message(let message):
                     self?.receive(message)
-                    self?.logger.info("\(event.description)")
+                    self?.logger.debug("\(event.description)")
                 case .disconnected:
                     self?.state = .notConnected
                     self?.logger.info("\(event.description)")
