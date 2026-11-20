@@ -116,13 +116,15 @@ public final class Relay: ObservableObject, EventVerifying, RelayOperating, Hash
     private let logger = Logger(subsystem: "NostrSDK", category: "Relay")
     
     /// Creates a new Relay with the provided URL.
-    /// - Parameter url: The websocket URL of the relay
+    /// - Parameters:
+    ///   - url: The websocket URL of the relay.
+    ///   - session: The caller-owned session used for every connection and reconnect.
     ///
     /// > Important: The url must have a websocket scheme (e.g. "wss" or "ws").
-    public init(url: URL) throws {
+    public init(url: URL, session: URLSession = .shared) throws {
         _ = try RelayURLValidator.shared.validateRelayURL(url)
 
-        socket = WebSocket(url)
+        socket = WebSocket(url, session: session)
         socketSubscription = socket.subject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in

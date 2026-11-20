@@ -35,8 +35,8 @@ public final class RelayPool: ObservableObject, RelayOperating {
         setUpRelays()
     }
     
-    public convenience init(relayURLs: Set<URL> = [], delegate: RelayDelegate? = nil) throws {
-        try self.init(relays: Set(relayURLs.compactMap { try Relay(url: $0) }),
+    public convenience init(relayURLs: Set<URL> = [], delegate: RelayDelegate? = nil, session: URLSession = .shared) throws {
+        try self.init(relays: Set(relayURLs.compactMap { try Relay(url: $0, session: session) }),
                       delegate: delegate)
     }
     
